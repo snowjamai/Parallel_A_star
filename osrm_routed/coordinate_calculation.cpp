@@ -5,7 +5,8 @@
 
 #include <boost/assert.hpp>
 
-#include <mapbox/cheap_ruler.hpp>
+// #include <mapbox/cheap_ruler.hpp>
+#include "third_party/cheap-ruler-cpp-2.5.4/include/mapbox/cheap_ruler.hpp"
 
 #include <algorithm>
 #include <iterator>
