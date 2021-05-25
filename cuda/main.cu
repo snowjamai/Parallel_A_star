@@ -4,6 +4,8 @@
 #include <vector>
 #include <cuda_runtime.h>
 
+#include "Route.cuh"
+
 using namespace std;
 
 typedef struct Node {
@@ -13,19 +15,23 @@ typedef struct Node {
 } Node;
 
 Node road[10000000];
-float lan[10000000];
-float lot[10000000];
+float lat[10000000];
+float lon[10000000];
+
 
 
 vector<double> arr;
 vector<float> tmp;
 
-__global__ void Print(Node *a){
-    printf("%d\n", a[999].dest[0]);
-}
 
 __device__ Node *gpu_road;
-__device__ int start_node, end_node;
+__device__ int *start_node, *end_node, *start_len, *end_len;
+__device__ float *gpu_lat, *gpu_lon;
+
+__global__ void Print(int *a, int *node){
+    for(int i = 0; i < *a; ++i)
+        printf("***%d\n", node[i]);
+}
 
 void GetTmp(string str) {
     string s;
@@ -66,8 +72,8 @@ int main(void)
                 break;
             GetTmp(str);
 
-            lan[(int)tmp[1]] = tmp[6];
-            lot[(int)tmp[1]] = tmp[7];
+            lat[(int)tmp[1]] = tmp[6];
+            lon[(int)tmp[1]] = tmp[7];
 
             if ((int)tmp[4]!= 0) {
                 road[(int)tmp[1]].dest[road[(int)tmp[1]].r_len] = (int)tmp[2];
@@ -85,7 +91,27 @@ int main(void)
     cudaMalloc(&gpu_road, 10000000 * sizeof(Node));
     cudaMemcpy(gpu_road, road, 10000000 * sizeof(Node), cudaMemcpyHostToDevice);
 
-    Print<<<1,1>>>(gpu_road);
+    cudaMalloc(&gpu_lat, 10000000 * sizeof(float));
+    cudaMemcpy(gpu_lat, lat, 10000000 * sizeof(float), cudaMemcpyHostToDevice);
+
+    cudaMalloc(&gpu_lon, 10000000 * sizeof(float));
+    cudaMemcpy(gpu_lon, lon, 10000000 * sizeof(float), cudaMemcpyHostToDevice);
+
+    cudaMalloc(&start_len, sizeof(int));
+    cudaMalloc(&start_node, sizeof(int) * 10);
+    cudaMalloc(&end_len, sizeof(int));
+    cudaMalloc(&end_node, sizeof(int) * 10);
+
+
+    FindStart<<<1,1>>>(gpu_lat,gpu_lon, 126.972778,37.556328, start_node, start_len);
+    FindEnd<<<1,1>>>(gpu_lat,gpu_lon, 129.042049,35.115294, end_node, end_len);
+    cudaDeviceSynchronize();
+
+
+
+
+    Print<<<1,1>>>(start_len, start_node);
+    Print<<<1,1>>>(end_len, end_node);
     cudaDeviceSynchronize();
 
     return 0;
