@@ -2,16 +2,24 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <sys/shm.h>
+#include <sys/ipc.h>
 #include "dataType.cuh"
+
+#define _ROAD_GPU_  0x50000000
 using namespace std;
 
 
 vector<float> tmp;
 Node road[10000000];
+__device__ Node* gpu_road;
 float lan[10000000];
+__device__ float* gpu_lan;
 float lot[10000000];
+__device__ float* gpu_lot;
 
-
+cudaIpcMemHandle_t road_gpuHandle;
+int gpu_roadID = 0x0fffffff;
 
 //string -> float
 void GetTmp(string str) {
@@ -28,7 +36,7 @@ void GetTmp(string str) {
     tmp.push_back(stof(s));
 }
 //load mapdata from csv & link node
-void LoadMap(string csv)
+int LoadMap(string csv)
 {
     ifstream node, edge;
 
@@ -79,7 +87,7 @@ void LoadMap(string csv)
             else {
                 return errno;
             }
-            cout << "Error in ROAD GPU ERRNO : " << errno << '\n';
+            cout << "Error in ROAD GPU " << errno << '\n';
         }
         cudaMalloc(&gpu_road,10000000*sizeof(Node));
         cudaIpcGetMemHandle((cudaIpcMemHandle_t *) &road_gpuHandle, (void*)gpu_road);
@@ -94,4 +102,3 @@ void LoadMap(string csv)
         edge.close();
     }
 }
-
