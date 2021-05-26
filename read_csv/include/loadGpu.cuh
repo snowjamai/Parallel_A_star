@@ -67,6 +67,30 @@ void LoadMap(string csv)
             }
             tmp.clear();
         }
+        //for IPC
+        if((gpu_roadID = shmget(_ROAD_GPU_,sizeof(cudaIpcMemHandle_t),0666 | IPC_CREAT | IPC_EXCL)) < 0)
+        {
+            if (errno == EEXIST) {
+                if ((gpu_roadID = shmget(_ROAD_GPU_, 0, 0666)) < 0)
+                    return errno;
+                if (shmctl(gpu_roadID, IPC_RMID, (struct shmid_ds *)0x00) < 0)
+                    return errno;
+            }
+            else {
+                return errno;
+            }
+            cout << "Error in ROAD GPU ERRNO : " << errno << '\n';
+        }
+        cudaMalloc(&gpu_road,10000000*sizeof(Node));
+        cudaIpcGetMemHandle((cudaIpcMemHandle_t *) &road_gpuHandle, (void*)gpu_road);
+        cudaMemcpy(gpu_road,road,10000000*sizeof(Node),cudaMemcpyHostToDevice);
+
+        cudaIpcMemHandle_t* temp = (cudaIpcMemHandle_t *)shmat(gpu_roadID, 0, 0);
+        if (temp == (void*)-1) {
+            if (gpu_roadID != -1) shmctl(gpu_roadID, IPC_RMID, (struct shmid_ds *) 0);
+        }
+        memcpy(temp, &road_gpuHandle, sizeof(cudaIpcMemHandle_t));
+
         edge.close();
     }
 }
