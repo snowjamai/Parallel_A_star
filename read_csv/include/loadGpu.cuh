@@ -94,5 +94,4 @@ void LoadMap(string csv)
         edge.close();
     }
 }
-//load gpu mapdata
-__global__ void LoadMapGPU(Node *)
+
