@@ -6,7 +6,7 @@
 #include "findNearCPU.h"
 #include "osmLoadCPU.h"
 
-float epsilon = 0.001;
+float epsilon = 0.0005;
 
 void FindStartCPU(float *cpu_lat, float *cpu_lon, float lat, float lon, int *start, int *start_len){
     for (int i = 0; i < TOTAL_NODE_NUM; i++){

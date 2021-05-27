@@ -5,12 +5,17 @@
 #include <iostream>
 #include <functional>
 #include <vector>
+#include <algorithm>
 #include <queue>
 #include <cmath>
 
 #include "AstarCPU.h"
 #include "dataTypeCPU.h"
 #include "osmLoadCPU.h"
+
+using namespace std;
+
+Node* closed_list = new Node [TOTAL_NODE_NUM];
 
 float heuristic(float query_lat, float query_lon, float goal_lat, float goal_lon) {
     // use haversine distance    
@@ -32,10 +37,10 @@ float heuristic(float query_lat, float query_lon, float goal_lat, float goal_lon
     return rad * c;
 }
 
-void astarCPU(int *st_node, int *goal_node, int st_num, int goal_num, float goal_lat, float goal_lon){
+int astarCPU(int *st_node, int *goal_node, int st_num, int goal_num, float goal_lat, float goal_lon){
     auto cmp = [](Node *small, Node *large) { return small->f > large->f; };
     std::priority_queue<Node*, std::vector<Node*>, decltype(cmp)> open_list(cmp);
-    Node* closed_list = new Node [TOTAL_NODE_NUM];
+    // Node* closed_list = new Node [TOTAL_NODE_NUM];
 
     
     for (int i = 0; i < st_num; i++) {
@@ -51,18 +56,18 @@ void astarCPU(int *st_node, int *goal_node, int st_num, int goal_num, float goal
         Node* q = open_list.top();
         open_list.pop();
 
-        // for (int i = 0; i < goal_num; i++) {
-        //     if (q->node_id == goal_node[i]){
-        //         printf("goal node[%d]\n", q->node_id);
-        //         printf("COUNT[%d]\n", cnt);
-        //         return;
-        //     }
-        // }
-        if (q->node_id == goal_node[0]) {
-            printf("goal node[%d]\n", q->node_id);
-            printf("COUNT[%d]\n", cnt);
-            return;
+        for (int i = 0; i < goal_num; i++) {
+            if (q->node_id == goal_node[i]){
+                printf("goal node[%d]\n", q->node_id);
+                printf("COUNT[%d]\n", cnt);
+                return q->node_id;
+            }
         }
+        // if (q->node_id == goal_node[0]) {
+        //     printf("goal node[%d]\n", q->node_id);
+        //     printf("COUNT[%d]\n", cnt);
+        //     return q->node_id;
+        // }
         
         Node** ex_nodes = new Node* [q->r_len];
         for (int i = 0; i < q->r_len; i++) {
@@ -80,5 +85,23 @@ void astarCPU(int *st_node, int *goal_node, int st_num, int goal_num, float goal
         }
     }
     
-    return;
+    return -1;
+}
+
+vector<Node*> generateRoute(int* st_node, int st_num, int goal_id) {
+    vector<Node*> Route;
+    int node_id = goal_id;
+
+    while (1) {
+        Route.push_back(&road[node_id]);
+        node_id = road[node_id].prev_node->node_id;
+
+        for (int i = 0; i < st_num; i++) {
+            if (node_id == st_node[i]) {
+                Route.push_back(&road[node_id]);
+                reverse(Route.begin(), Route.end());
+                return Route;
+            }
+        }
+    }
 }
