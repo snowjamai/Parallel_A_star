@@ -1,3 +1,4 @@
 # Parallel_A_star .gitignore
 .vscode/
 *.out
+*.exe
