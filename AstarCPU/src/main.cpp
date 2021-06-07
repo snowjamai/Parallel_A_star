@@ -24,7 +24,7 @@ int main(void)
    // float goal_lat(35.115110), goal_lon(129.041224); // Busan station
    float st_lat(37.556328), st_lon(126.972778);
    float goal_lat(35.115294), goal_lon(129.042049);
-   int st_node[10], goal_node[10];
+   int st_node[20], goal_node[20];
    int st_num(0), goal_num(0);
 
    FindStartCPU(lat, lon, st_lat, st_lon, st_node, &st_num);
