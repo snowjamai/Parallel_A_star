@@ -17,7 +17,7 @@ using namespace std;
 
 int main(void)
 {
-   string osm_csv = "../osm_data/result_node.csv";
+   string osm_csv = "../../osm_data/result_node.csv";
    LoadMapCPU(osm_csv);
 
    // float st_lat(37.566572), st_lon(126.978411);     // Seoul cityhall
